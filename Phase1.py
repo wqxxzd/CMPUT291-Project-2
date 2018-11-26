@@ -1,3 +1,15 @@
+import sys
+
+
+def GetFileName():
+    if (len(sys.argv) != 2):
+        print('Invalid command line.')
+        sys.exit()
+    fname = sys.argv[1]
+    return fname
+
+
+
 def substraction(line, str1, str2):
     index1 = -1
     index1 = line.find(str1)
@@ -12,28 +24,32 @@ def substraction(line, str1, str2):
 
 
 def simplified(outputfile, wlist, aid):
+    if (wlist == -1):
+        return 0
+    #print(type(wlist))
     str1 = '&#'
     str2 = ';'
-    str3 = '&apos;'
+    str5 = '&apos;'
     str4 = '&quot;'
-    str5 = '&amp;'
+    str3 = '&amp;'
     
     while(1):
-        #print('1')
         index1 = wlist.find(str1)
         if (index1 == -1):
             break
         templist = wlist[index1:]
-        #print(templist)
         index2 = templist.find(str2)
-        #print(index1)
-        #print(index2+len(wlist)-len(templist))
-        #break
         if (index2 != -1):
             word = wlist[index1 + len(str1): index2+len(wlist)-len(templist)]
-            #print(word)
-            wlist = wlist[:index1] +  wlist[index2+len(wlist)-len(templist)+1:]
-      
+            
+            if (word.isdigit()):
+                wlist = wlist[:index1] +  wlist[index2+len(wlist)-len(templist)+1:]
+            else:
+                index1 = wlist.find(str1)
+                wlist = wlist.replace(str1, '  ')
+                index2 = wlist.find(str2)
+                wlist = wlist.replace(str1, ' ')
+            
         
     while(1):
         index1 = wlist.find(str3)
@@ -67,12 +83,13 @@ def simplified(outputfile, wlist, aid):
         if (len(term) > 2):
             nlist.append(term.lower())
             outputfile.write(term.lower() + ':' + aid + '\n' )
-    #print(nlist)
     return 0
 
 
 
 def pdates(outputfile, date, aid, category, location):
+    if(date == -1):
+        return 0
     outputfile.write(date + ':' + aid + ',' + category + ',' + location + '\n' )
     return 0
 
@@ -82,7 +99,7 @@ def prices(outputfile, price, aid, category, location):
     if (price == -1):
         return 0
     else:
-        outputfile.write(price + ':' + aid + ',' + category + ',' + location + '\n' )
+        outputfile.write(price.rjust(12, ' ') + ':' + aid + ',' + category + ',' + location + '\n' )
         return 0
 
 
@@ -94,7 +111,8 @@ def ads(outputfile, aid, line):
 
         
 def main():
-    infile = open('10.txt', 'r')
+    fname = GetFileName()    
+    infile = open(fname, 'r')
     outfile1 = open('terms.txt', 'w')
     outfile2 = open('pdates.txt', 'w')
     outfile3 = open('prices.txt', 'w')
@@ -108,9 +126,6 @@ def main():
             category = substraction(line, '<cat>', '</cat>')
             location = substraction(line, '<loc>', '</loc>')
             price = substraction(line, '<price>', '</price>')
-            #print('\n')
-            #print(title)
-            #print(description)
             simplified(outfile1, title, aid)
             simplified(outfile1, description, aid)
             pdates(outfile2, date, aid, category, location)
@@ -120,7 +135,8 @@ def main():
     outfile1.close()
     outfile2.close()
     outfile3.close()
-    outfile4.close()         
+    outfile4.close()
+            
     return 0
     
 main()
